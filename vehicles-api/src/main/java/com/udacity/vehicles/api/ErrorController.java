@@ -2,7 +2,7 @@ package com.udacity.vehicles.api;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.hateoas.VndErrors;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +27,8 @@ public class ErrorController extends ResponseEntityExceptionHandler {
         List<String> errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage()).collect(
-                        Collectors.toList());
+                .map(error -> String.format("%s: %s", error.getField(), error.getDefaultMessage()))
+                .collect(Collectors.toList());
 
         ApiError apiError = new ApiError(DEFAULT_VALIDATION_FAILED_MESSAGE, errors);
         return handleExceptionInternal(ex, apiError, headers, HttpStatus.BAD_REQUEST, request);
