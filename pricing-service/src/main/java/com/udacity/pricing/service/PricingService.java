@@ -14,6 +14,9 @@ import java.util.stream.LongStream;
  */
 public class PricingService {
 
+    private PricingService() {
+    }
+
     /**
      * Holds {ID: Price} pairings (current implementation allows for 20 vehicles)
      */
@@ -24,23 +27,18 @@ public class PricingService {
 
     /**
      * If a valid vehicle ID, gets the price of the vehicle from the stored array.
+     *
      * @param vehicleId ID number of the vehicle the price is requested for.
      * @return price of the requested vehicle
      * @throws PriceException vehicleID was not found
      */
     public static Price getPrice(Long vehicleId) throws PriceException {
-        /**
-         * TODO: Implement the getPrice function, which uses the `PRICES`
-         *   mapping above to access the price for the requested vehicleID.
-         *   Make sure it can handle exceptions, either here or in the PricingController!
-         *   The below code should be removed.
-         */
-        Price price = new Price("USD", BigDecimal.ZERO, 0L);
-        return price;
+        return PRICES.get(vehicleId);
     }
 
     /**
      * Gets a random price to fill in for a given vehicle ID.
+     *
      * @return random price for a vehicle
      */
     private static BigDecimal randomPrice() {
