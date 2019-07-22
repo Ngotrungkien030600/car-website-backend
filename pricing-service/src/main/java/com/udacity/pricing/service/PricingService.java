@@ -14,9 +14,6 @@ import java.util.stream.LongStream;
  */
 public class PricingService {
 
-    private PricingService() {
-    }
-
     /**
      * Holds {ID: Price} pairings (current implementation allows for 20 vehicles)
      */
@@ -24,6 +21,9 @@ public class PricingService {
             .range(1, 20)
             .mapToObj(i -> new Price("USD", randomPrice(), i))
             .collect(Collectors.toMap(Price::getVehicleId, p -> p));
+
+    private PricingService() {
+    }
 
     /**
      * If a valid vehicle ID, gets the price of the vehicle from the stored array.

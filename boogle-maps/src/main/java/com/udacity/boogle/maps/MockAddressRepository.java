@@ -11,35 +11,6 @@ import java.util.stream.Collectors;
 class MockAddressRepository {
 
     /**
-     * Gets a random address from the list.
-     *
-     * @return A new, random address split into street, city, state and zip
-     */
-    static Address getRandom() {
-
-        Random generator = new Random();
-        int randomIndex = generator.nextInt(ADDRESSES.length);
-
-        String address = ADDRESSES[randomIndex];
-
-        String[] addressParts = address.split(",");
-        String streetAndNumber = addressParts[0];
-        String cityStateAndZip = addressParts[1];
-
-        String[] cityStateAndZipParts = cityStateAndZip.trim().split(" ");
-
-        LinkedList<String> list =
-                Arrays.stream(cityStateAndZipParts).map(String::trim)
-                        .collect(Collectors.toCollection(LinkedList::new));
-
-        String zip = list.pollLast();
-        String state = list.pollLast();
-        String city = String.join(" ", list);
-
-        return new Address(streetAndNumber, city, state, zip);
-    }
-
-    /**
      * An array of random addresses for use in getRandom()
      */
     private static final String[] ADDRESSES = {
@@ -278,4 +249,33 @@ class MockAddressRepository {
             "4538 Us Hwy 231, Wetumpka AL 36092",
             "2575 Us Hwy 43, Winfield AL 35594"
     };
+
+    /**
+     * Gets a random address from the list.
+     *
+     * @return A new, random address split into street, city, state and zip
+     */
+    static Address getRandom() {
+
+        Random generator = new Random();
+        int randomIndex = generator.nextInt(ADDRESSES.length);
+
+        String address = ADDRESSES[randomIndex];
+
+        String[] addressParts = address.split(",");
+        String streetAndNumber = addressParts[0];
+        String cityStateAndZip = addressParts[1];
+
+        String[] cityStateAndZipParts = cityStateAndZip.trim().split(" ");
+
+        LinkedList<String> list =
+                Arrays.stream(cityStateAndZipParts).map(String::trim)
+                        .collect(Collectors.toCollection(LinkedList::new));
+
+        String zip = list.pollLast();
+        String state = list.pollLast();
+        String city = String.join(" ", list);
+
+        return new Address(streetAndNumber, city, state, zip);
+    }
 }
