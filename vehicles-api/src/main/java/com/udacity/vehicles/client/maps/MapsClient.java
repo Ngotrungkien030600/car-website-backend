@@ -36,7 +36,7 @@ public class MapsClient {
      */
     public Location getAddress(Location location) {
         try {
-            Address address = this.client
+            Address address = client
                     .get()
                     .uri(uriBuilder -> uriBuilder
                             .path("/maps")
@@ -48,7 +48,7 @@ public class MapsClient {
                     .bodyToMono(Address.class)
                     .block();
 
-            this.mapper.map(Objects.requireNonNull(address), location);
+            mapper.map(Objects.requireNonNull(address), location);
 
             return location;
         } catch (Exception e) {
