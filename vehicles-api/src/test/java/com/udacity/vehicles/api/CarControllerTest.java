@@ -1,5 +1,4 @@
-package com.udacity.vehicles.api;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.udacity.vehicles.domain.Condition;
 import com.udacity.vehicles.domain.Location;
 import com.udacity.vehicles.domain.car.Car;
@@ -10,111 +9,94 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * Implements testing of the CarController class.
- */
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-@AutoConfigureJsonTesters
 public class CarControllerTest {
 
     @Autowired
-    private MockMvc mvc;
-
-    @Autowired
-    private JacksonTester<Car> json;
+    private MockMvc mockMvc;
 
     @MockBean
     private CarService carService;
 
-    /**
-     * Creates pre-requisites for testing, such as an example car.
-     */
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private Car car;
+
     @Before
     public void setup() {
-        Car car = getCar();
-        given(carService.save(any())).willReturn(car);
-        given(carService.findById(any())).willReturn(car);
-        given(carService.list()).willReturn(Collections.singletonList(car));
+        car = getCar();
     }
 
-    /**
-     * Tests for successful creation of new car in the system
-     *
-     * @throws Exception when car creation fails in the system
-     */
-    @Test
-    public void createCar() throws Exception {
-        Car car = getCar();
-        mvc.perform(
-                post("/cars")
-                        .content(json.write(car).getJson())
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
-                        .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isCreated());
-    }
-
-    /**
-     * Tests if the read operation appropriately returns a list of vehicles.
-     *
-     * @throws Exception if the read operation of the vehicle list fails
-     */
     @Test
     public void listCars() throws Exception {
-        mvc.perform(
-                get("/cars")
-                        .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isOk());
+        List<Car> cars = Collections.singletonList(car);
+        given(carService.list()).willReturn(cars);
+
+        mockMvc.perform(get("/cars"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$._embedded.carList[0].details.model").value("Impala"));
     }
 
-    /**
-     * Tests the read operation for a single car by ID.
-     *
-     * @throws Exception if the read operation for a single car fails
-     */
     @Test
-    public void findCar() throws Exception {
-        Car car = getCar();
-        mvc.perform(
-                get("/cars/{id}", car.getId())
-                        .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isOk());
+    public void getCar() throws Exception {
+        given(carService.findById(1L)).willReturn(car);
+
+        mockMvc.perform(get("/cars/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$.details.model").value("Impala"));
     }
 
-    /**
-     * Tests the deletion of a single car by ID.
-     *
-     * @throws Exception if the delete operation of a vehicle fails
-     */
+    @Test
+    public void createCar() throws Exception {
+        given(carService.save(any(Car.class))).willReturn(car);
+
+        mockMvc.perform(post("/cars")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(car)))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$.details.model").value("Impala"));
+    }
+
+    @Test
+    public void updateCar() throws Exception {
+        given(carService.save(any(Car.class))).willReturn(car);
+
+        mockMvc.perform(put("/cars/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(car)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$.details.model").value("Impala"));
+    }
+
     @Test
     public void deleteCar() throws Exception {
-        Car car = getCar();
-        mvc.perform(delete("/cars/{id}", car.getId()))
+        mockMvc.perform(delete("/cars/1"))
                 .andExpect(status().isNoContent());
     }
 
-    /**
-     * Creates an example Car object for use in testing.
-     *
-     * @return an example Car object
-     */
     private Car getCar() {
         Car car = new Car();
         car.setId(1L);
@@ -133,6 +115,7 @@ public class CarControllerTest {
         details.setNumberOfDoors(4);
         car.setDetails(details);
         car.setCondition(Condition.USED);
+        car.setPrice(BigDecimal.valueOf(25000.00));
         return car;
     }
 }
