@@ -256,26 +256,16 @@ class MockAddressRepository {
      * @return A new, random address split into street, city, state and zip
      */
     static Address getRandom() {
-
         Random generator = new Random();
-        int randomIndex = generator.nextInt(ADDRESSES.length);
-
-        String address = ADDRESSES[randomIndex];
-
+        String address = ADDRESSES[generator.nextInt(ADDRESSES.length)];
         String[] addressParts = address.split(",");
-        String streetAndNumber = addressParts[0];
-        String cityStateAndZip = addressParts[1];
-
-        String[] cityStateAndZipParts = cityStateAndZip.trim().split(" ");
-
-        LinkedList<String> list =
-                Arrays.stream(cityStateAndZipParts).map(String::trim)
-                        .collect(Collectors.toCollection(LinkedList::new));
-
-        String zip = list.pollLast();
-        String state = list.pollLast();
-        String city = String.join(" ", list);
-
+        String streetAndNumber = addressParts[0].trim();
+        String cityStateAndZip = addressParts[1].trim();
+        String[] cityStateAndZipParts = cityStateAndZip.split(" ");
+        String zip = cityStateAndZipParts[cityStateAndZipParts.length - 1];
+        String state = cityStateAndZipParts[cityStateAndZipParts.length - 2];
+        String city = Arrays.stream(cityStateAndZipParts, 0, cityStateAndZipParts.length - 2)
+                .collect(Collectors.joining(" "));
         return new Address(streetAndNumber, city, state, zip);
     }
 }
